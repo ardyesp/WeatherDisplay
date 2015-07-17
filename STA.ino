@@ -13,15 +13,25 @@
 void setupSTA()	{
 // ------------------------
 	log("Connecting to " + String(config.ssid));
-
-	WiFi.mode(WIFI_STA);
+	
 	WiFi.disconnect();
+	WiFi.mode(WIFI_STA);
 	delay(100);
 	
 	WiFi.begin(config.ssid, config.password);
 
-	while (WiFi.status() != WL_CONNECTED)
+	long startTime = millis();
+	
+	while (WiFi.status() != WL_CONNECTED)	{
 		delay(200);
+		
+		if( (millis() - startTime) > WEB_CONNECTION_TIMEOUT)	{
+			log("Wifi connect failed");
+			wInfo.error = true;
+			wInfo.msg = "Wifi connection failed";
+			return;
+		}
+	}
 
 	IPAddress myIP = WiFi.localIP();
 	char tbuf[20];
@@ -34,6 +44,12 @@ void setupSTA()	{
 // ------------------------
 boolean getOWData(boolean forecast)	{
 // ------------------------
+	if(WiFi.status() != WL_CONNECTED)	{
+		wInfo.error = true;
+		wInfo.msg = "Wifi not connected";
+		return false;
+	}
+
 	// reinitialize json storage
 	websiteData = "";
 	

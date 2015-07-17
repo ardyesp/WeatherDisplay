@@ -15,8 +15,8 @@ void setupAP()	{
 // ------------------------
 	log("Starting AP: " + String(softAPSSID));
 	
-	WiFi.mode(WIFI_AP_STA);
 	WiFi.disconnect();
+	WiFi.mode(WIFI_AP_STA);
 	delay(100);
 	
 	WiFi.softAP(softAPSSID);
@@ -25,7 +25,13 @@ void setupAP()	{
 	char tbuf[20];
 	sprintf(tbuf, "%i.%i.%i.%i", serverIP[0], serverIP[1], serverIP[2], serverIP[3]);
 	log("AP IP: " + String(tbuf));
-	
+}
+
+
+
+// ------------------------
+void startConfigServer()	{
+// ------------------------
 	// Create an instance of web server
 	server = new ESP8266WebServer(80);
 
@@ -39,12 +45,14 @@ void setupAP()	{
 	
 	// Start the server
 	server->begin();
+	
+	log("Config server started");
 }
 
 
 
 // ------------------------
-void scanServeAPClient()	{
+void scanServeConfigClient()	{
 // ------------------------
 	server->handleClient();	
 }

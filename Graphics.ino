@@ -135,6 +135,9 @@ void drawLandscape()	{
 	if(wInfo.error)
 		drawString(0, 0, "!");
 	
+	drawString(70, 35, "Hi");
+	drawString(70, 50, "Lo");
+
 	drawString(landscapeInfo.hi.x, landscapeInfo.hi.y, landscapeInfo.hi.buf);
 	drawString(landscapeInfo.lo.x, landscapeInfo.lo.y, landscapeInfo.lo.buf);
 }
@@ -313,12 +316,12 @@ void formatLandscapeInfo()   {
 	landscapeInfo.curTemp.x = 55;
 	landscapeInfo.curTemp.y = 0;
 	
-	sprintf(landscapeInfo.hi.buf, "Hi   %i", wInfo.hi);
-	landscapeInfo.hi.x = 70;
+	sprintf(landscapeInfo.hi.buf, "%i", wInfo.hi);
+	landscapeInfo.hi.x = 95;
 	landscapeInfo.hi.y = 35;
 
-	sprintf(landscapeInfo.lo.buf, "Lo   %i", wInfo.lo);
-	landscapeInfo.lo.x = 70;
+	sprintf(landscapeInfo.lo.buf, "%i", wInfo.lo);
+	landscapeInfo.lo.x = 95;
 	landscapeInfo.lo.y = 50;
 	
 	setFont(WEATHER_FONT);

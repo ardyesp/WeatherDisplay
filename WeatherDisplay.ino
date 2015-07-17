@@ -22,6 +22,7 @@
 #include "Unifont16.h"
 #include "Weather32.h"
 #include "Splash.h"
+#include "helper.h"
 
 // pin defs
 #define ESP_OLED_CS     15  // Pin 19, CS - Chip select
@@ -57,7 +58,6 @@ struct ConfigEntries	{
 }
 config;
 
-
 // app variables
 
 // OLED display (128x64) used in SPI mode
@@ -74,18 +74,25 @@ boolean screen1 = false;
 
 static unsigned int lastDisplayMode = displayFormat;
 
-// wifi operation model - AP or STA
-boolean apModeOperation = false;
+// wifi operation model - AP+STA or just AP
+boolean staModeOperation = true;
 boolean firstTime = true;
 
 // ------------------------
 void setup()   {
 // ------------------------
+	bootflags flags = detectBootmode();
 	Serial.begin(115200);
 	
 	// start display device
 	initDisplay();
 	delay(2000);
+	
+	if(flags.rst_watchdog == 1)	{
+		log("-------------------");
+		log("Watchdog reset");
+		log("-------------------");
+	}
 	
 	// setup console show switch - pullup
 	pinMode(PIN_LANDSCAPE, INPUT_PULLUP);
@@ -94,12 +101,16 @@ void setup()   {
 	
 	// load the configuration from flash memory
 	if( !readConfig() )
-		apModeOperation = true;
+		staModeOperation = false;
 	
-	if(apModeOperation)	
-		setupAP();
-	else
+	if(staModeOperation)
 		setupSTA();
+	else
+		// setup AP server
+		setupAP();
+	
+	// http server for configuring this device
+	startConfigServer();
 
 	log("Free Heap: " + String(ESP.getFreeHeap()));
 }
@@ -109,10 +120,9 @@ void setup()   {
 // ------------------------
 void loop() {
 // ------------------------
-	if(apModeOperation)	{
-		scanServeAPClient();
-	}
-	else	{
+	scanServeConfigClient();
+	
+	if(staModeOperation)	{
 		// scheduled tasks - flip screen, refresh weather, misc
 		handleTasks();
 		

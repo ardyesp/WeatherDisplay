@@ -304,7 +304,12 @@ void drawString(const char *str)	{
 		if(ch == 0)
 			break;
 		
-		fontData._cursorX += drawChar(ch) + fontData._charSpacing;
+		uint8_t chWidth = drawChar(ch);
+		
+		// add space for displayable chars only
+		if(chWidth > 0)
+			fontData._cursorX += chWidth + fontData._charSpacing;
+		
 		str++;
 	}
 }
