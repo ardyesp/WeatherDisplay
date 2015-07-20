@@ -34,6 +34,7 @@
 #define MISC_REFRESH_INTERVAL		60000
 
 // external switches
+#define PIN_MISC			4
 #define PIN_LANDSCAPE		5
 
 // screen types
@@ -96,11 +97,12 @@ void setup()   {
 	
 	// setup console show switch - pullup
 	pinMode(PIN_LANDSCAPE, INPUT_PULLUP);
+	pinMode(PIN_MISC, INPUT_PULLUP);
 	
 	initStructure();
 	
 	// load the configuration from flash memory
-	if( !readConfig() )
+	if( !readConfig() || digitalRead(PIN_MISC) )
 		staModeOperation = false;
 	
 	if(staModeOperation)
