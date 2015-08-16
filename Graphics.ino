@@ -140,6 +140,11 @@ void drawLandscape()	{
 
 	drawString(landscapeInfo.hi.x, landscapeInfo.hi.y, landscapeInfo.hi.buf);
 	drawString(landscapeInfo.lo.x, landscapeInfo.lo.y, landscapeInfo.lo.buf);
+	
+	if(screen1)
+		// toggle alive indication dot
+		display.drawPixel(127, 63, WHITE);
+
 }
 
 
