@@ -76,6 +76,7 @@ boolean getOWData(boolean forecast)	{
 	if(forecast)	{
 		log("Requesting forecast...");
 		client.print("GET /data/2.5/forecast/daily?cnt=2&id=" + String(config.fCityid) + 
+			"&APPID=" + String(config.apiKey) + 
 			"&units=" + ((config.unit == CELSIUS)? "metric" : "imperial") +
 			" HTTP/1.1\r\n" +
 			"Host: " + OWN_RT_HOST + "\r\n" + 
@@ -84,6 +85,7 @@ boolean getOWData(boolean forecast)	{
 	else	{
 		log("Requesting data...");
 		client.print("GET /data/2.5/weather?id=" + String(config.cityID) + 
+			"&APPID=" + String(config.apiKey) + 
 			"&units=" + ((config.unit == CELSIUS)? "metric" : "imperial") +
 			" HTTP/1.1\r\n" +
 			"Host: " + OWN_RT_HOST + "\r\n" + 

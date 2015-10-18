@@ -1,10 +1,12 @@
 /*
 	Fetch data from weather service and render on screen
 	ESP8266 Hardware SPI pins
-		GPIO12   MISO (DIN)
-		GPIO14   CLOCK          - (D0)
-		GPIO13   MOSI (DOUT)    - (D1)
-		GPIO15   CS
+		GPIO12	MISO
+		GPIO14	CLOCK	 - (D0 or CLK)
+		GPIO13	MOSI    - (D1 or DIN)
+		GPIO15	CS
+		GPIO2	DC
+		GPIO16	RESET
 */
 
 #include <ESP8266WiFi.h>
@@ -15,6 +17,14 @@
 #include <ESP_SSD1306.h> 
 #include <EEPROM.h>
 #include <Ticker.h>
+extern "C" {
+  #include "user_interface.h"
+}
+
+// local includes
+#include "global.h"
+#include "config.h"
+#include "webPage.h"
 
 // custom GLCD fonts
 #include "Helv32.h"
@@ -22,42 +32,6 @@
 #include "Unifont16.h"
 #include "Weather32.h"
 #include "Splash.h"
-#include "helper.h"
-
-// pin defs
-#define ESP_OLED_CS     15  // Pin 19, CS - Chip select
-#define ESP_OLED_DC     2   // Pin 20  DC - digital signal
-#define ESP_OLED_RESET  16  // Pin 15  RESET
-
-// repetetive task times
-#define SCREEN_FLIP_INTERVAL		5000
-#define MISC_REFRESH_INTERVAL		60000
-
-// external switches
-#define PIN_MISC			4
-#define PIN_LANDSCAPE		5
-
-// screen types
-#define DISPLAY_CONSOLE		1
-#define DISPLAY_LANDSCAPE	2
-#define DISPLAY_PORTRAIT	3
-
-
-// app configuration entries
-enum Scale	{
-	CELSIUS, 
-	FAHRENHEIT, 
-};
-
-// configuration variables
-struct ConfigEntries	{
-	char ssid[20], password[20];
-	boolean scraperOWM = true;
-	char cityID[20], fCityid[20];
-	long interval;
-	Scale unit = CELSIUS;
-}
-config;
 
 // app variables
 
@@ -65,7 +39,6 @@ config;
 ESP_SSD1306 display(ESP_OLED_DC, ESP_OLED_RESET, ESP_OLED_CS);
 
 // logging variables
-#define MAX_LOG_LINES	8
 String logLines[MAX_LOG_LINES];
 int currentLogLine = 0;
 
@@ -76,24 +49,18 @@ boolean screen1 = false;
 static unsigned int lastDisplayMode = displayFormat;
 
 // wifi operation model - AP+STA or just AP
+boolean stayAPMode = false;
 boolean staModeOperation = true;
 boolean firstTime = true;
 
 // ------------------------
 void setup()   {
 // ------------------------
-	bootflags flags = detectBootmode();
 	Serial.begin(115200);
 	
 	// start display device
 	initDisplay();
 	delay(2000);
-	
-	if(flags.rst_watchdog == 1)	{
-		log("-------------------");
-		log("Watchdog reset");
-		log("-------------------");
-	}
 	
 	// setup console show switch - pullup
 	pinMode(PIN_LANDSCAPE, INPUT_PULLUP);
@@ -102,7 +69,7 @@ void setup()   {
 	initStructure();
 	
 	// load the configuration from flash memory
-	if( !readConfig() || digitalRead(PIN_MISC) )
+	if( !readConfig() || !digitalRead(PIN_MISC) )
 		staModeOperation = false;
 	
 	if(staModeOperation)

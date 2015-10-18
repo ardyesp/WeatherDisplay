@@ -318,7 +318,7 @@ void formatLandscapeInfo()   {
 // ------------------------
 	// format for landscape mode
 	sprintf(landscapeInfo.curTemp.buf, "%i", wInfo.curTemp, 0xb0);
-	landscapeInfo.curTemp.x = 55;
+	landscapeInfo.curTemp.x = 60;
 	landscapeInfo.curTemp.y = 0;
 	
 	sprintf(landscapeInfo.hi.buf, "%i", wInfo.hi);
